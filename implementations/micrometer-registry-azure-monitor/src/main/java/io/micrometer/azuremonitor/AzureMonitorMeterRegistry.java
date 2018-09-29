@@ -82,7 +82,11 @@ public class AzureMonitorMeterRegistry extends StepMeterRegistry {
                     this::trackMeter
             ).forEach(telemetry -> {
                 try {
-                    client.track(telemetry);
+                    // Currently AzureMonitor backend expects count > 0 as a valid metric aggregate.
+                    // This will be removed in future as the backend updates it's implementation
+                    if (telemetry.getCount() > 0) {
+                        client.track(telemetry);
+                    }
                 } catch (Throwable e) {
                     logger.warn("Failed to track metric {}", meter.getId());
                     TraceTelemetry traceTelemetry = new TraceTelemetry("Failed to track metric " + meter.getId());
